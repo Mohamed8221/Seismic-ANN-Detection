@@ -1,4 +1,4 @@
-Below is the full documentation for the `README.md` file, which explains the purpose, setup, and usage of your project:
+Here's the updated `README.md` file with the requested resource added to the **Resources** section:
 
 ```markdown
 # Seismic Signal Detection and Processing for Space Apps 2024
@@ -158,6 +158,13 @@ The results of your model training, testing, and tomography analysis will be sto
 
 ---
 
+## Resources
+- **Seismic Noise Tomography**: [GitHub Repository](https://github.com/bgoutorbe/seismic-noise-tomography)
+- **NASA Space Apps Challenge**: [Website](https://www.spaceappschallenge.org/)
+- **Obspy Documentation**: [Obspy](https://docs.obspy.org/)
+
+---
+
 ## Troubleshooting
 
 1. **Missing Dependencies**: If any Python libraries are missing, ensure that you have installed them using the `pip install` commands provided in the Prerequisites section.
@@ -189,10 +196,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 - **Seismic Data Repositories** for making seismic data accessible for research.
 ```
 
----
-
-### Notes for Your Use Case:
-- **Paths**: Make sure the paths to data files like `lunar_velocity_data.xlsx` and `mars_velocity_data.xlsx` are correctly set in the scripts.
-- **Customization**: Adjust the model architecture, workflows, or data loading logic depending on how your project evolves.
-
-This `README.md` provides comprehensive instructions for anyone looking to understand, set up, and run your seismic signal detection project.
+This `README.md` file includes the added resource for seismic noise tomography from the GitHub repository, along with the previous sections. It provides comprehensive documentation on how to set up, use, and troubleshoot the project.
