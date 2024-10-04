@@ -23,6 +23,8 @@ def load_catalog(catalog_file_path):
     return catalog
 
 def list_files_in_directory(directory_path, extension=".mseed"):
-    """List all files in a given directory with a specific extension."""
-    search_pattern = os.path.join(directory_path, f"*{extension}")
-    return glob.glob(search_pattern)
+    search_pattern = os.path.join(directory_path, f"**/*{extension}")
+    files = glob.glob(search_pattern, recursive=True)
+    print(f"Files found in {directory_path}: {files}")
+    return files
+

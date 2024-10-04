@@ -5,13 +5,20 @@ from test_model import test_model_on_data
 from seismic_noise_tomography import seismic_noise_tomography
 import numpy as np
 import os
-from sklearn.preprocessing import LabelEncoder  # Import LabelEncoder
+import joblib  # For saving the model
+from sklearn.preprocessing import LabelEncoder
+
 
 def mars_workflow(training_data_path, catalog_path, test_data_path, output_path):
     """Main workflow for handling Mars seismic data."""
 
     # Load and preprocess Mars data for training
     mseed_files = list_files_in_directory(training_data_path)
+    if not mseed_files:
+        print(f"No training data found in {training_data_path}. Skipping Mars workflow.")
+        return  # Skip the rest of the function if no files are found
+
+    print(f"Files found in {training_data_path}: {mseed_files}")
 
     # Load the quake catalog
     catalog = load_catalog(catalog_path)
@@ -29,7 +36,11 @@ def mars_workflow(training_data_path, catalog_path, test_data_path, output_path)
 
     # Encode labels to numeric format using LabelEncoder
     label_encoder = LabelEncoder()
-    y_train = label_encoder.fit_transform(catalog['evid'].values)  # Assuming 'evid' needs encoding
+    y_train = label_encoder.fit_transform(catalog['evid'].values)
+
+    if X_train.size == 0:
+        print("No training data to process. Skipping Mars workflow.")
+        return
 
     # Build and train the neural network model
     model = build_model(input_shape=(X_train.shape[1], 1))
