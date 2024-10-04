@@ -8,6 +8,10 @@ lunar_catalog_path = r'D:\Nasa space apps\space_apps_2024_seismic_detection\spac
 lunar_test_paths = [
     r'D:\Nasa space apps\space_apps_2024_seismic_detection\space_apps_2024_seismic_detection\data\lunar\test\data\S12_GradeB',
     r'D:\Nasa space apps\space_apps_2024_seismic_detection\space_apps_2024_seismic_detection\data\lunar\test\data\S15_GradeA'
+    r'D:\Nasa space apps\space_apps_2024_seismic_detection\space_apps_2024_seismic_detection\data\lunar\test\data\S15_GradeB'
+    r'D:\Nasa space apps\space_apps_2024_seismic_detection\space_apps_2024_seismic_detection\data\lunar\test\data\S16_GradeA'
+    r'D:\Nasa space apps\space_apps_2024_seismic_detection\space_apps_2024_seismic_detection\data\lunar\test\data\S16_GradeA'
+
 ]
 lunar_output_path = r'results\lunar'
 
