@@ -1,4 +1,3 @@
-Here's the updated `README.md` file with the requested resource added to the **Resources** section:
 
 ```markdown
 # Seismic Signal Detection and Processing for Space Apps 2024
