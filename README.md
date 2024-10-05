@@ -10,8 +10,9 @@ This project uses deep learning techniques to detect seismic events from both lu
 5. [Mars Workflow](#mars-workflow)
 6. [Model Training](#model-training)
 7. [Testing](#testing)
-8. [Troubleshooting](#troubleshooting)
-9. [Acknowledgements](#acknowledgements)
+8. [Resources](#resources)
+9. [Troubleshooting](#troubleshooting)
+10. [Acknowledgements](#acknowledgements)
 
 ## Project Structure
 
