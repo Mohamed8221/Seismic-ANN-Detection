@@ -1,0 +1,9 @@
+tensorflow
+obspy
+pandas
+numpy
+scikit-learn
+scipy
+PyWavelets
+joblib
+openpyxl

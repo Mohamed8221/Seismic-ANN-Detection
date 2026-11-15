@@ -1,213 +1,73 @@
 # Seismic-ANN-Detection
 
-This project uses deep learning techniques to detect seismic events from both lunar and Mars datasets. It processes raw seismic data, removes noise, trains models, and evaluates the performance on test data. The workflow is separated for lunar and Mars data, with each having its own preprocessing steps and model.
+Detecting seismic events in lunar (Apollo) and Mars (InSight) seismograms with a neural network. Built for the **NASA Space Apps Challenge 2024**, "Seismic Detection Across the Solar System".
 
-## Table of Contents
-1. [Project Structure](#project-structure)
-2. [Requirements](#requirements)
-3. [Setup Instructions](#setup-instructions)
-4. [Lunar Workflow](#lunar-workflow)
-5. [Mars Workflow](#mars-workflow)
-6. [Model Training](#model-training)
-7. [Testing](#testing)
-8. [Resources](#resources)
-9. [Troubleshooting](#troubleshooting)
-10. [Acknowledgements](#acknowledgements)
+The pipeline reads raw MiniSEED traces, removes noise with a high-pass filter and wavelet denoising, trains a binary classifier per planet, and writes a catalog of predictions for the test traces.
 
-## Project Structure
+## How it works
+
+1. **Load** MiniSEED traces and the event catalog (`data_loading.py`).
+2. **Preprocess** each trace: Butterworth high-pass filter, then wavelet denoising (`preprocessing.py`).
+3. **Train** a feed-forward network on the padded signals (`model.py`): Flatten → Dense(100, ReLU) → Dropout(0.5) → Dense(1, sigmoid), Adam optimizer, binary cross-entropy, 20 epochs, batch size 64.
+4. **Predict** on the test traces and save a CSV (`test_model.py`).
+
+Lunar and Mars data run through separate workflows (`lunar_workflow.py`, `mars_workflow.py`), each with its own model.
+
+## Repository layout
 
 ```
-├── data                          # Data files for lunar and Mars seismic events
-│   ├── lunar
-│   │   ├── training
-│   │   ├── test
-│   └── mars
-│       ├── training
-│       ├── test
-│
-├── results                       # Output directory for results
-│   ├── lunar
-│   └── mars
-│
-├── src                           # Source code files
-│   ├── main.py                   # Main entry point to run both workflows
-│   ├── lunar_workflow.py          # Lunar seismic data workflow
-│   ├── mars_workflow.py           # Mars seismic data workflow
-│   ├── model.py                  # Contains the build_model function
-│   ├── preprocessing.py           # Data preprocessing methods (filtering, wavelet denoising)
-│   ├── data_loading.py            # Loading MiniSEED and CSV data
-│   ├── seismic_noise_tomography.py# Seismic noise tomography functionality
-│   ├── test_model.py              # Function for testing the trained models
-│   └── utils.py                  # Utility functions for managing datasets
-│
-└── README.md                     # This file (documentation)
+├── main.py                      # Entry point: runs the lunar and Mars workflows
+├── lunar_workflow.py            # Lunar training and testing
+├── mars_workflow.py             # Mars training and testing
+├── model.py                     # build_model()
+├── preprocessing.py             # High-pass filter, wavelet denoising
+├── data_loading.py              # MiniSEED and catalog loading
+├── test_model.py                # Runs a trained model over test traces
+├── seismic_noise_tomography.py  # Noise analysis on exported velocity data
+├── m.py                         # Helper: export a MiniSEED trace to Excel
+├── lunar_velocity_data.xlsx     # Exported lunar velocity trace
+├── mars_velocity_data.xlsx      # Exported Mars velocity trace
+└── results/
+    ├── lunar/                   # Trained model, label encoder, predictions
+    └── mars/                    # Predictions
 ```
 
-## Requirements
+## Results
 
-Make sure you have the following dependencies installed:
+Sample outputs are committed under `results/`:
 
-- Python 3.9+
-- TensorFlow 2.x
-- ObsPy
-- Pandas
-- NumPy
-- Scikit-learn
-- SciPy
-- PyWavelets
+- `results/lunar/lunar_output.csv`: predictions for 64 lunar test traces
+- `results/mars/mars_output.csv`: predictions for 9 Mars test traces
+- `results/lunar/lunar_model.h5`: the trained lunar model
 
-You can install the necessary packages using:
+Each row has the trace filename, its start time, and the predicted label.
+
+## Running it
+
+Requires Python 3.9+.
 
 ```bash
+git clone https://github.com/Mohamed8221/Seismic-ANN-Detection.git
+cd Seismic-ANN-Detection
 pip install -r requirements.txt
 ```
 
-*Note: `requirements.txt` should contain the package list mentioned above.*
+The dataset is not included. Download the Space Apps 2024 seismic detection data package from the [challenge page](https://www.spaceappschallenge.org/), then **edit the paths at the top of `main.py`** (and the Excel path in `mars_workflow.py` and `m.py`) so they point at your copy. They are currently absolute Windows paths from the original development machine.
 
-## Setup Instructions
-
-1. **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/username/Seismic-ANN-Detection.git
-    cd Seismic-ANN-Detection
-    ```
-
-2. **Ensure data files are in the correct location:**
-    - Place lunar data in `data/lunar/training` and `data/lunar/test`.
-    - Place Mars data in `data/mars/training` and `data/mars/test`.
-
-3. **Run the workflow for both lunar and Mars data:**
-
-    ```bash
-    python src/main.py
-    ```
-
-This will:
-- Load, preprocess, and clean the data.
-- Train and save the model for both lunar and Mars seismic events.
-- Evaluate the model using test data.
-
-## Lunar Workflow
-
-The lunar workflow consists of loading lunar seismic data, applying preprocessing (highpass filtering and wavelet denoising), training a neural network, and testing the model.
-
-### Lunar Training
-
-- The training data is loaded from the path specified in `main.py`.
-- Data preprocessing:
-    - **Highpass Filtering**: Removes low-frequency noise from the data.
-    - **Wavelet Denoising**: Denoises the seismic signals using wavelets.
-- After preprocessing, a 1D Convolutional Neural Network (CNN) is trained to detect seismic events.
-
-### Lunar Testing
-
-- After training, the model is tested on lunar test datasets.
-- Predictions are saved in `results/lunar/lunar_output.csv`.
-
-## Mars Workflow
-
-The Mars workflow is similar to the lunar workflow, with data sourced from Mars missions.
-
-### Mars Training
-
-- Training data is loaded from the `mars` directory.
-- Similar preprocessing steps (highpass filtering, wavelet denoising) are applied to Mars data.
-- A neural network model is trained using these preprocessed signals.
-
-### Mars Testing
-
-- Once trained, the Mars model is tested with Mars test data, and predictions are saved in `results/mars/mars_output.csv`.
-
-## Model Training
-
-The `build_model()` function constructs and trains a neural network for seismic event detection. Below is a breakdown of the layers in the model:
-
-```python
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Dropout, Flatten, Conv1D, MaxPooling1D
-
-def build_model(input_shape):
-    """Build and return a neural network model."""
-    model = Sequential()
-    
-    # 1D Convolutional layer
-    model.add(Conv1D(filters=64, kernel_size=5, activation='relu', input_shape=input_shape))
-    model.add(MaxPooling1D(pool_size=2))
-
-    # Flatten for Dense layers
-    model.add(Flatten())
-
-    # Fully connected Dense layers
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
-    
-    model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.5))
-    
-    model.add(Dense(1, activation='sigmoid'))
-
-    # Compile the model
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-    return model
+```bash
+python main.py
 ```
 
-### Parameters:
-- **Input Shape**: The shape of the preprocessed data (length of the signal).
-- **Conv1D Layer**: Extracts spatial features from the seismic signals.
-- **Dense Layers**: Fully connected layers to interpret the extracted features.
-- **Dropout Layers**: Prevent overfitting during training.
-
-### Training:
-```python
-model.fit(X_train, y_train, epochs=20, batch_size=64, validation_split=0.2)
-```
-
-- **Epochs**: The number of times the model will be trained on the dataset.
-- **Batch size**: How many samples are used in one iteration of the optimization algorithm.
-- **Validation Split**: 20% of the training data is used for validation.
-
-## Testing
-
-Once trained, the model is tested on test data. The test data undergoes similar preprocessing and is passed to the trained model for predictions. Results are saved in CSV files.
-
-```python
-test_model_on_data(test_data_path, model, output_file)
-```
-
-- **Input**: Test data directory.
-- **Output**: CSV file with the model's predictions.
-
-## Resources
-- **Seismic Noise Tomography**: [GitHub Repository](https://github.com/bgoutorbe/seismic-noise-tomography)
-- **NASA Space Apps Challenge**: [Website](https://www.spaceappschallenge.org/)
-- **Obspy Documentation**: [Obspy](https://docs.obspy.org/)
+Predictions are written to `results/lunar/` and `results/mars/`.
 
 ## Troubleshooting
 
-### 1. **Zero or One Predictions**
-- Ensure the dataset is well-balanced between the classes. If the model always predicts the same class, use class weighting to counteract imbalances:
-  ```python
-  class_weights = {0: 1.0, 1: 2.0}  # Example for class imbalance
-  ```
+- **Model predicts a single class:** the catalog is imbalanced. Try class weights in `model.fit(...)` or a different decision threshold in `test_model.py`.
+- **`FileNotFoundError`:** check the data paths in `main.py`.
+- **AVX2/FMA warnings from TensorFlow:** informational, safe to ignore.
 
-### 2. **Warnings about AVX2 FMA**
-- These warnings are informational and can be ignored unless you're optimizing for performance.
+## Resources
 
-### 3. **Model Performance Issues**
-- If the model isn't performing well:
-  - Try adjusting the **threshold** for predictions:
-    ```python
-    test_predictions = (model.predict(X_test) > 0.6).astype(int)
-    ```
-  - Ensure data preprocessing steps are correctly applied to both training and test data.
-
-### 4. **FileNotFoundError**
-- Double-check the data directory structure to ensure files are placed correctly as per the project structure.
-
-## Acknowledgements
-
-- This project was developed for NASA's Space Apps Challenge 2024.
-- Special thanks to [your team members or contributors].
-
+- [NASA Space Apps Challenge](https://www.spaceappschallenge.org/)
+- [ObsPy documentation](https://docs.obspy.org/)
+- [seismic-noise-tomography](https://github.com/bgoutorbe/seismic-noise-tomography)
